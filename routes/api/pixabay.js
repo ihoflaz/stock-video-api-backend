@@ -6,6 +6,16 @@ router.get('/search', async (req, res) => {
   try {
     const { q = '', page = 1 } = req.query;
     
+    if (!process.env.PIXABAY_API_KEY) {
+      throw new Error('PIXABAY_API_KEY environment variable is not set');
+    }
+
+    console.log('Pixabay API Request:', {
+      query: q,
+      page: page,
+      apiKey: 'Mevcut'
+    });
+
     const response = await axios.get('https://pixabay.com/api/videos/', {
       params: {
         key: process.env.PIXABAY_API_KEY,
@@ -13,31 +23,33 @@ router.get('/search', async (req, res) => {
         page: page,
         per_page: 20
       }
+    }).catch(error => {
+      console.error('Pixabay API Error Response:', error.response?.data);
+      throw new Error(`Pixabay API Error: ${error.response?.data?.message || error.message}`);
     });
 
-    console.log('Pixabay API Response:', response.data);
+    console.log('Pixabay API Response:', {
+      totalHits: response.data.totalHits,
+      total: response.data.total,
+      hitsCount: response.data.hits?.length
+    });
 
-    if (!response.data || !response.data.hits) {
-      return res.status(500).json({
-        error: 'Geçersiz API yanıtı',
-        hits: [],
-        totalHits: 0
-      });
+    if (!response.data || !Array.isArray(response.data.hits)) {
+      throw new Error('Invalid API response format');
     }
 
     res.json({
-      hits: response.data.hits || [],
-      totalHits: response.data.totalHits || 0,
-      total: response.data.total || 0
+      hits: response.data.hits,
+      totalHits: response.data.totalHits,
+      total: response.data.total
     });
 
   } catch (error) {
-    console.error('Pixabay API Error:', error.response?.data || error.message);
-    res.status(500).json({ 
+    console.error('Pixabay Search Error:', error);
+    res.status(error.response?.status || 500).json({ 
       error: 'Pixabay API\'ye erişirken bir hata oluştu',
-      details: error.message,
-      hits: [],
-      totalHits: 0
+      message: error.message,
+      details: error.response?.data
     });
   }
 });

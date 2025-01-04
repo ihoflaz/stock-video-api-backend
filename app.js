@@ -4,19 +4,40 @@ require('dotenv').config();
 
 var app = express();
 
+// CORS ve JSON middleware
 app.use(cors());
 app.use(express.json());
+
+// API durum kontrolü
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    env: {
+      pixabayKey: process.env.PIXABAY_API_KEY ? 'Mevcut' : 'Eksik',
+      pexelsKey: process.env.PEXELS_API_KEY ? 'Mevcut' : 'Eksik'
+    }
+  });
+});
 
 // API routes
 app.use('/api/pixabay', require('./routes/api/pixabay'));
 app.use('/api/pexels', require('./routes/api/pexels'));
 
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404).json({
+    error: 'Endpoint bulunamadı',
+    path: req.path
+  });
+});
+
 // Error handling
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  console.error('Sunucu Hatası:', err);
+  res.status(err.status || 500).json({
     error: 'Sunucu hatası',
-    details: err.message
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
