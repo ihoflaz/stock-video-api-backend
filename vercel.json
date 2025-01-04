@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/app.js"
+    }
+  ],
+  "env": {
+    "PIXABAY_API_KEY": "@pixabay_api_key",
+    "PEXELS_API_KEY": "@pexels_api_key"
+  }
+} 
