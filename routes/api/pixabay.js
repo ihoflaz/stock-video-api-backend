@@ -15,11 +15,29 @@ router.get('/search', async (req, res) => {
       }
     });
 
-    res.json(response.data);
+    console.log('Pixabay API Response:', response.data);
+
+    if (!response.data || !response.data.hits) {
+      return res.status(500).json({
+        error: 'Geçersiz API yanıtı',
+        hits: [],
+        totalHits: 0
+      });
+    }
+
+    res.json({
+      hits: response.data.hits || [],
+      totalHits: response.data.totalHits || 0,
+      total: response.data.total || 0
+    });
+
   } catch (error) {
+    console.error('Pixabay API Error:', error.response?.data || error.message);
     res.status(500).json({ 
       error: 'Pixabay API\'ye erişirken bir hata oluştu',
-      details: error.message 
+      details: error.message,
+      hits: [],
+      totalHits: 0
     });
   }
 });

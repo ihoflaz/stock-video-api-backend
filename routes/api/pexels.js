@@ -6,6 +6,12 @@ router.get('/search', async (req, res) => {
   try {
     const { q = '', page = 1 } = req.query;
     
+    console.log('Pexels API Request:', {
+      query: q,
+      page: page,
+      apiKey: process.env.PEXELS_API_KEY ? 'Mevcut' : 'Eksik'
+    });
+
     const response = await axios.get('https://api.pexels.com/videos/search', {
       headers: {
         'Authorization': process.env.PEXELS_API_KEY
