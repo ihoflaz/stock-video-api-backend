@@ -17,11 +17,30 @@ router.get('/search', async (req, res) => {
       }
     });
 
-    res.json(response.data);
+    console.log('Pexels API Response:', response.data);
+
+    if (!response.data || !response.data.videos) {
+      return res.status(500).json({
+        error: 'Geçersiz API yanıtı',
+        videos: [],
+        total_results: 0
+      });
+    }
+
+    res.json({
+      videos: response.data.videos || [],
+      total_results: response.data.total_results || 0,
+      page: parseInt(page),
+      per_page: response.data.per_page || 20
+    });
+
   } catch (error) {
+    console.error('Pexels API Error:', error.response?.data || error.message);
     res.status(500).json({ 
       error: 'Pexels API\'ye erişirken bir hata oluştu',
-      details: error.message 
+      details: error.message,
+      videos: [],
+      total_results: 0
     });
   }
 });
