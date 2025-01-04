@@ -4,8 +4,13 @@ require('dotenv').config();
 
 var app = express();
 
-// CORS ve JSON middleware
-app.use(cors());
+// CORS ayarlarını güncelleyelim
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // API durum kontrolü
