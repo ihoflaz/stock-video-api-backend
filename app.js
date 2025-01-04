@@ -4,7 +4,7 @@ require('dotenv').config();
 
 var app = express();
 
-// CORS ayarlarını güncelleyelim
+// CORS ayarları
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -13,10 +13,16 @@ app.use(cors({
 
 app.use(express.json());
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'Stock Video API is running' });
+});
+
 // API durum kontrolü
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
+    timestamp: new Date().toISOString(),
     env: {
       pixabayKey: process.env.PIXABAY_API_KEY ? 'Mevcut' : 'Eksik',
       pexelsKey: process.env.PEXELS_API_KEY ? 'Mevcut' : 'Eksik'
@@ -32,7 +38,8 @@ app.use('/api/pexels', require('./routes/api/pexels'));
 app.use((req, res, next) => {
   res.status(404).json({
     error: 'Endpoint bulunamadı',
-    path: req.path
+    path: req.path,
+    method: req.method
   });
 });
 
@@ -42,7 +49,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     error: 'Sunucu hatası',
     message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    path: req.path,
+    method: req.method
   });
 });
 
